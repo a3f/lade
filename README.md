@@ -8,7 +8,7 @@ takes a hardcoded dll and a process and mates them
 
 What it has yet to do:
 
-- CLI interface
+- CLI
 - error handling
 - call initialize function from dll
 - unload dll
