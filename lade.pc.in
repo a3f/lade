@@ -1,0 +1,13 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: liblade
+Description: Inject shared objects into other processes at runtime
+URL: http://github.com/a3f/lade
+Version: @PROJECT_VERSION@
+Requires:
+Libs: -L${libdir} -llade
+Cflags: -I${includedir}
+ 

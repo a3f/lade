@@ -1,0 +1,61 @@
+#ifndef LADE_H_
+#define LADE_H_
+/**
+ * \file lade.h
+ *
+ * Copyright (C) 2017 Ahmad Fatoum <ahmad@a3f.at>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
+ * Main header for liblade
+ */
+
+
+#define LADE_VERSION "${PROJECT_VERSION}"
+#cmakedefine LADE_HAVE_PID_T 1
+
+#include <stdint.h>
+
+#if LADE_HAVE_PID_T
+    #ifdef NO_OLDNAMES
+        #undef NO_OLDNAMES
+            #include <sys/types.h>
+        #define NO_OLDNAMES
+    #else /* !NO_OLDNAMES */
+        #include <sys/types.h>
+    #endif /* !NO_OLDNAMES */
+#else /* !LADE_HAVE_PID_T */
+typedef long pid_t;
+#endif /* !LADE_HAVE_PID_T */
+
+enum { LADE_VERBOSE = 1, LADE_SELF_INJECT = 2 };
+
+typedef struct lade_t lade_t;
+
+/**
+ * \param pid   process id to inject library into
+ * \param dll   path to DLL to load
+ * \param flags must be zero
+ *
+ * \returns non-NULL on success, NULL otherwise
+ *
+ * Loads the referenced DLL into the target process
+ * \NOTE if pid == getpid() or -1, falls back to normal dlopen(3)
+ * \NOTE Return value will hopefully get more useful in future
+ */
+lade_t *lade(pid_t pid, const char *dll, int flags);
+
+#endif

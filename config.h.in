@@ -1,0 +1,14 @@
+/* This is private */
+#ifndef VAS_CONFIG_H_
+#define VAS_CONFIG_H_
+
+#cmakedefine HAVE_PID_H 1
+#cmakedefine HAVE_PTRACE_H 1
+#cmakedefine HAVE_OFF_T 1
+#cmakedefine HAVE_PID_T 1
+#cmakedefine HAVE_MMAN_H 1
+#cmakedefine HAVE_PREAD 1
+#cmakedefine HAVE_PWRITE 1
+#cmakedefine HAVE_LIBPROC_H 1
+
+#endif
