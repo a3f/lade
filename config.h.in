@@ -1,6 +1,6 @@
 /* This is private */
-#ifndef VAS_CONFIG_H_
-#define VAS_CONFIG_H_
+#ifndef LADE_CONFIG_H_
+#define LADE_CONFIG_H_
 
 #cmakedefine HAVE_PID_H 1
 #cmakedefine HAVE_PTRACE_H 1
@@ -9,6 +9,9 @@
 #cmakedefine HAVE_MMAN_H 1
 #cmakedefine HAVE_PREAD 1
 #cmakedefine HAVE_PWRITE 1
-#cmakedefine HAVE_LIBPROC_H 1
+#cmakedefine HAVE_LIBPID 1
+
+#define DLL_PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
+#define DLL_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}"
 
 #endif

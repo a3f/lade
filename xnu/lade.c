@@ -24,8 +24,17 @@ static struct lade_t {
 lade_t *
 lade(pid_t pid, const char *dll, int flags)
 {
+    if (pid < 0 && !dll)
+        return NULL; /* can't self inject self */
+
     if ((pid < 0 || pid == getpid()) && !(flags & LADE_SELF_INJECT))
         return dlopen(dll, RTLD_LAZY);
+
+    if (!dll) {
+        return NULL; /* Inferring self name not yet supported */
+    }
+
+    // FIXME: turn relative to absolute path
 
     if (!bootstrapfn) {
         if (flags & LADE_VERBOSE)

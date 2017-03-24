@@ -44,15 +44,18 @@ lade_t *lade(pid_t pid, const char *dll, int flags)
     if (!LL)
         return win_perror("GetProcAddress");
 
-    SIZE_T dll_len = strlen(dll) + 1;
+    LPVOID arg = (void*)1;
+    if (!(flags & LADE_CRASH)) {
+        SIZE_T dll_len = strlen(dll) + 1;
 
-    LPVOID arg = VirtualAllocEx(proc, NULL, dll_len, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    if (arg == NULL)
-        return win_perror("VirtualAllocEx");
+        arg = VirtualAllocEx(proc, NULL, dll_len, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        if (arg == NULL)
+            return win_perror("VirtualAllocEx");
 
-    SIZE_T bytes_written;
-    if (!WriteProcessMemory(proc, arg,  dll, dll_len, &bytes_written))
-        return win_perror("WriteProcessMemory");
+        SIZE_T bytes_written;
+        if (!WriteProcessMemory(proc, arg,  dll, dll_len, &bytes_written))
+            return win_perror("WriteProcessMemory");
+    }
 
     HANDLE tid = CreateRemoteThread(proc, NULL, 0, (LPTHREAD_START_ROUTINE)LL, arg, 0, NULL);
     if (tid == NULL)

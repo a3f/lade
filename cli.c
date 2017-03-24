@@ -27,6 +27,7 @@
 #include "config.h"
 #include "lade.h"
 #include "cli.h"
+#include "cli-utils.h"
 #ifdef  _WIN32
 #include "cli-win32.h"
 #else
@@ -40,9 +41,17 @@
 
 #include "ext/utarray.h"
 
-#ifdef HAVE_LIBPROC_H
-static pid_t getProcessByName(const char *name);
-#endif
+
+struct {
+    unsigned verbose :1;
+    unsigned failed  :1;
+    unsigned await   :1;
+    unsigned noarg   :1;
+    unsigned color   :1;
+} opts = {0};
+
+#define SHIM_RETURN die("%s", msg);
+#include "libpid-shim.h"
 
 static const char *arg0;
 static int
@@ -51,8 +60,9 @@ print_usage(bool verbose)
     int indent = printf("Usage: %s ", arg0);
     puts("[-av] ");
     printf("%*c", indent, ' ');
-    puts("[-p pid] [-w title] [-c class] [-f exe]  [--] dll ...");
+    puts("[-p pid] [-w title] [-c class] [-f exe]  [-Ldir] [-ldll] [--] [dll] ...");
     
+    printf("       %s [exe] ... [-Ldir] -ldll \n" , arg0);
     printf("       %s -h\n", arg0);
 
     if (verbose) {
@@ -62,18 +72,12 @@ print_usage(bool verbose)
     return EXIT_FAILURE;
 }
 
-struct {
-    unsigned verbose :1;
-    unsigned failed  :1;
-    unsigned await   :1;
-    unsigned color   :1;
-} opts = {0};
-
 int
 main(int argc, char *argv[])
 {
     UT_array *dlls = NULL;
     pid_t pid = -1;
+    char *wndtitle = NULL, *wndclass = NULL;
     int flags = 0;
     arg0 = argv[0];
 
@@ -84,21 +88,37 @@ main(int argc, char *argv[])
 
     while (optind < argc) {
         int opt;
-        if((opt = getopt(argc, argv, "ap:w:c:f:hv")) != -1) {
+        if((opt = getopt(argc, argv, "ap:w:c:f:hvl:L:x")) != -1) {
             switch(opt) {
                 char *endptr;
 
+                case 'L':
+                    if (chdir(optarg) == -1) 
+                        die("Invalid path -L%s", optarg);
+                    break;
+                case 'l': {
+                              char *dll = concat(DLL_PREFIX, optarg, DLL_SUFFIX, 0);
+                              if (access(dll, F_OK) == -1) {
+                                  warn("File '%s' not found", dll);
+                                  opts.failed = 1;
+                                  continue;
+                              }
+
+                              utarray_push_back(dlls, &dll);
+                          }
+                          break;
                 case 'f': /*   file name  */
-#ifdef HAVE_LIBPROC_H
-                    pid = getProcessByName(optarg);
+                    // FIXME: doesn't work on windows
+                    pid = pid_byname(optarg);
                     if (pid < 0)
                         die("No matching process found.");
+
                 break;
-#endif
                 case 'w': /* window title */
+                    wndtitle = optarg;
+                    break;
                 case 'c': /* window class */
-                    /*die("libpid support not compiled in. Please supply pid directly.");*/
-                    die("Not yet supported");
+                    wndclass = optarg;
                 break;
 
                 case 'p': /*  process id  */
@@ -111,6 +131,10 @@ main(int argc, char *argv[])
 
                 case 'a': /* await */
                     opts.await = 1;
+                break;
+                case 'x':
+                    flags = LADE_CRASH;
+                    opts.noarg = 1;
                 break;
                 case 'h': return print_usage(true);
                 case 'v': opts.verbose = 1; break;
@@ -129,7 +153,12 @@ main(int argc, char *argv[])
         }
     }
 
-    if (!utarray_len(dlls))
+    if (wndclass || wndtitle)
+        pid = pid_bywindow(wndclass, wndtitle);
+
+    if (opts.noarg)
+        return lade(pid, NULL, flags) != NULL;
+    else if (!utarray_len(dlls))
         die("%s: No input files", arg0);
 
     for(const char **dll = utarray_front(dlls); dll; dll = utarray_next(dlls, dll)) {
@@ -146,37 +175,4 @@ main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-#ifdef HAVE_LIBPROC_H
-
-#include <libproc.h>
-
-//FIXME: remove this, move it to libpid
-// See xnu/ for LICENSE notice
-pid_t getProcessByName(const char *name)
-{
-    int procCnt = proc_listpids(PROC_ALL_PIDS, 0, NULL, 0);
-    pid_t pids[1024];
-    memset(pids, 0, sizeof pids);
-    proc_listpids(PROC_ALL_PIDS, 0, pids, sizeof(pids));
-
-    for (int i = 0; i < procCnt; i++) {
-        if (!pids[i]) continue;
-        char curPath[PROC_PIDPATHINFO_MAXSIZE];
-        char curName[PROC_PIDPATHINFO_MAXSIZE];
-        memset(curPath, 0, sizeof curPath);
-        proc_pidpath(pids[i], curPath, sizeof curPath);
-        int len = strlen(curPath);
-        if (len) {
-            int pos = len;
-            while (pos && curPath[pos] != '/')
-                --pos;
-            strcpy(curName, curPath + pos + 1);
-            if (!strcmp(curName, name))
-                return pids[i];
-        }
-    }
-    return -1;
-}
-
-#endif
 

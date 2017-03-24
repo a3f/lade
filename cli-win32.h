@@ -3,6 +3,7 @@
 
 #include <io.h>
 #include <windows.h>
+#include <direct.h>
 
 // TODO: Replace these with Wide char counterparts
 static inline int
@@ -18,6 +19,12 @@ pause(void)
 {
     Sleep(INFINITE);
     return -1;
+}
+
+static inline int
+chdir(const char *dirname)
+{
+    return _chdir(dirname);
 }
 
 #endif

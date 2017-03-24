@@ -32,7 +32,7 @@ The command-line [lade utility] is licensed under the MIT license.
 - [ ] Allow multiple injections on macOS
 - [x] Refactor the Win32 code and upload it
 - [ ] Figure out how to do same with Linux
-- [ ] More advanced process identification
+- [x] More advanced process identification
 
 [DLL injection]: https://en.wikipedia.org/wiki/DLL_injection
 [lade_banner]: https://raw.githubusercontent.com/a3f/lade/master/ext/img/banner_by_reddit.com_u_Gin_chan.png

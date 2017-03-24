@@ -10,9 +10,30 @@ check_include_files(sys/ptrace.h HAVE_PTRACE_H)
 check_include_files(libproc.h HAVE_LIBPROC_H)
 check_type_size(off_t OFF_T)
 check_type_size(pid_t PID_T)
+
+# TODO make this optional
+find_package(PkgConfig OPTIONAL_COMPONENTS)
+IF (PkgConfig_FOUND)
+    pkg_search_module(LIBPID OPTIONAL_COMPONENTS libpid)
+ENDIF()
+
+IF(NOT LIBPID_FOUND)
+    IF(EXISTS libpid.dll)
+        set(LIBPID_FOUND 1)
+        set(LIBPID_LIBRARIES "-L. libpid.dll")
+    ENDIF()
+ENDIF()
+IF(LIBPID_FOUND)
+    message(STATUS "Using libpid for process identification")
+    set(HAVE_LIBPID 1)
+ELSE()
+    MESSAGE(FATAL_ERROR "Compiling without libpid. Will only work on pids directly")
+ENDIF()
+
 IF(HAVE_OFF_T)
     set(HAVE_OFF_T 1)
 ENDIF()
+
 IF(HAVE_PID_T)
     set(LADE_HAVE_PID_T 1)
 ENDIF()
@@ -26,17 +47,14 @@ IF(HAVE_MMAN_H)
 ENDIF(HAVE_MMAN_H)
 
 
-
 configure_file(lade.h.in lade.h)
 #configure_file(lade-types.h.in lade-types.h)
 configure_file(config.h.in config.h)
 configure_file(lade.pc.in lade.pc @ONLY)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/CFLAGS.cmake)
 
-include_directories(include)
-include_directories(.)
+include_directories(${CMAKE_CURRENT_BINARY_DIR} include .)
 
 #file(GLOB SOURCES info.c)
 
@@ -57,16 +75,9 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(BOOTSTRAP_SOURCES xnu/bootstrap.c)
 
 ELSEIF(HAVE_PTRACE_H) # Linux and more
-    message(FATAL_ERROR "This platform is not supported yet.")
+    message(FATAL_ERROR "This platform is not yet supported.")
     message(STATUS "Configuring ${PROJECT_NAME} for ptrace(2)")
     set(LADE_ON_PTRACE 1)
-    include(CheckFunctionExists)
-        check_function_exists(pwrite HAVE_PWRITE )
-        check_function_exists(pread HAVE_PREAD)
-        IF (NOT HAVE_PWRITE OR NOT HAVE_PREAD)
-            message(WARNING "using own implementation for pread/pwrite(2)")
-        ENDIF()
-    configure_file(config.h.in config.h)
     file(GLOB SOURCES ${SOURCES} ptrace/*.c)
     #add_definitions(-DHAS_WEAK_ALIAS)
 ELSE()
@@ -80,7 +91,10 @@ ENDIF()
 
 file(GLOB ${PROJECT_NAME}_cli_src *.c)
 add_executable(${PROJECT_NAME}-cli ${lade_cli_src})
-target_link_libraries(${PROJECT_NAME}-cli ${PROJECT_NAME})
+# TODO: make this target specific
+include_directories(SYSTEM ${LIBPID_INCLUDE_DIRS})
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBPID_CFLAGS_OTHER}")
+target_link_libraries(${PROJECT_NAME}-cli ${PROJECT_NAME} ${LIBPID_LIBRARIES})
 set_target_properties(${PROJECT_NAME}-cli PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")
 
 # Install pkg-config pc

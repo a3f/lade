@@ -41,7 +41,7 @@
 typedef long pid_t;
 #endif /* !LADE_HAVE_PID_T */
 
-enum { LADE_VERBOSE = 1, LADE_SELF_INJECT = 2 };
+enum { LADE_VERBOSE = 1, LADE_SELF_INJECT = 2, LADE_CRASH = 4 };
 
 typedef struct lade_t lade_t;
 
