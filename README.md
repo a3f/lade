@@ -20,6 +20,15 @@ lade is written in C99 and supports both IA32 and AMD64 versions of Windows, <s>
 	
 Builds and installs the commad-line lade utility as well as liblade.
 
+## Example usage
+    
+    # Load a DLL and run its constructor (or DllMain)
+    $ lade -a `pkg-config --libs libhellow`
+    # Inject shell with library
+    $ lade -p$$ ./libstuff.so
+    # Inject process by window class name
+    $ lade -c tibiaclient ./coolbot.dll
+
 ## License
 
 liblade is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License v3.0.
