@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(lade C)
-set(PROJECT_VERSION 0.01)
-set(CMAKE_BUILD_TYPE Debug)
+set(PROJECT_VERSION 0.02)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 include(CheckIncludeFiles)
 include(CheckTypeSize)
@@ -10,6 +10,10 @@ check_include_files(sys/ptrace.h HAVE_PTRACE_H)
 check_include_files(libproc.h HAVE_LIBPROC_H)
 check_type_size(off_t OFF_T)
 check_type_size(pid_t PID_T)
+
+set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(TestRestrictExtension)
+GMX_TEST_RESTRICT(RESTRICT_KEYWORD)
 
 # TODO make this optional
 find_package(PkgConfig OPTIONAL_COMPONENTS)
@@ -27,7 +31,7 @@ IF(LIBPID_FOUND)
     message(STATUS "Using libpid for process identification")
     set(HAVE_LIBPID 1)
 ELSE()
-    MESSAGE(FATAL_ERROR "Compiling without libpid. Will only work on pids directly")
+    MESSAGE(STATUS "Compiling without libpid. Will only work on pids directly")
 ENDIF()
 
 IF(HAVE_OFF_T)

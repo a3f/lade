@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include "config.h"
 
 char *strpcat(char *restrict s1, const char *restrict s2)
 {

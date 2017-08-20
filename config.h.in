@@ -11,6 +11,8 @@
 #cmakedefine HAVE_PWRITE 1
 #cmakedefine HAVE_LIBPID 1
 
+#define restrict ${RESTRICT_KEYWORD}
+
 #define DLL_PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
 #define DLL_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}"
 

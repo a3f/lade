@@ -108,7 +108,6 @@ main(int argc, char *argv[])
                           }
                           break;
                 case 'f': /*   file name  */
-                    // FIXME: doesn't work on windows
                     pid = pid_byname(optarg);
                     if (pid < 0)
                         die("No matching process found.");

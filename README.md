@@ -10,6 +10,8 @@ lade is a cross-platform [DLL injection] utility. Conveniently used over the com
 
 lade is written in C99 and supports both IA32 and AMD64 versions of Windows, <s>Linux</s> and macOS.
 
+[![Build Status](https://travis-ci.org/a3f/lade.svg?branch=master)](https://travis-ci.org/a3f/lade) [![Build status](https://ci.appveyor.com/api/projects/status/kx3yqmdxent7t3e0/branch/master?svg=true)](https://ci.appveyor.com/project/a3f/lade/branch/master)
+
 ## Build Instructions
 
     $ git clone https://github.com/a3f/lade
