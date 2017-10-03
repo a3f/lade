@@ -102,7 +102,7 @@ target_link_libraries(${PROJECT_NAME}-cli ${PROJECT_NAME} ${LIBPID_LIBRARIES})
 set_target_properties(${PROJECT_NAME}-cli PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")
 
 # Install pkg-config pc
-install(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION share/pkgconfig)
+install(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION lib/pkgconfig)
 
 # Install library and executable
 install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-cli
